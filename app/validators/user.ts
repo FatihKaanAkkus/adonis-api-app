@@ -2,8 +2,8 @@ import vine from '@vinejs/vine';
 
 export const userIndexValidator = vine.compile(
   vine.object({
-    page: vine.number().min(1).optional(),
-    perPage: vine.number().min(1).max(100).optional(),
+    page: vine.number().positive().withoutDecimals().optional(),
+    perPage: vine.number().positive().withoutDecimals().max(100).optional(),
   })
 );
 
@@ -17,19 +17,22 @@ export const userStoreValidator = vine.compile(
         return !user;
       }),
     password: vine.string().minLength(6),
-    fullName: vine.string(),
+    fullName: vine.string().nullable().optional(),
   })
 );
 
 export const userShowValidator = vine.compile(
   vine.object({
-    id: vine
-      .number()
-      .positive()
-      .exists(async (db, value) => {
-        const user = await db.from('users').where('id', value).first();
-        return !!user;
-      }),
+    params: vine.object({
+      id: vine
+        .number()
+        .positive()
+        .withoutDecimals()
+        .exists(async (db, value) => {
+          const user = await db.from('users').where('id', value).first();
+          return !!user;
+        }),
+    }),
   })
 );
 
@@ -38,11 +41,15 @@ export const userUpdateValidator = vine.withMetaData<{ id: number }>().compile(
     email: vine
       .string()
       .email()
-      .unique(async (db, value, { meta }) => {
-        const user = await db.from('users').where('email', value).whereNot('id', meta.id).first();
+      .unique(async (db, value, field) => {
+        const user = await db
+          .from('users')
+          .where('email', value)
+          .whereNot('id', field.meta.id)
+          .first();
         return !user;
       }),
     password: vine.string().minLength(6).optional(),
-    fullName: vine.string().optional(),
+    fullName: vine.string().nullable().optional(),
   })
 );

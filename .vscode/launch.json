@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "API dev server",
+      "program": "${workspaceFolder}/ace.js",
+      "args": ["serve", "--hmr"],
+      "skipFiles": ["<node_internals>/**"],
+      "outputCapture": "std"
+    }
+  ]
+}

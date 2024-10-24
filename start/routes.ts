@@ -19,8 +19,12 @@ router
   .group(() => {
     router.get('/', () => ({ version: 'v1' }));
 
-    router.post('register', [AuthController, 'register']);
-    router.post('login', [AuthController, 'login']);
+    router
+      .group(() => {
+        router.post('register', [AuthController, 'register']);
+        router.post('login', [AuthController, 'login']);
+      })
+      .prefix('auth');
 
     router
       .resource('users', UsersController)

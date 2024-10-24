@@ -3,18 +3,18 @@ import { authLoginValidator, authRegisterValidator } from '#validators/auth';
 import User from '#models/user';
 
 export default class AuthController {
-  async({}: HttpContext) {}
-
+  /**
+   * Register a new user
+   */
   async register({ request, response }: HttpContext) {
-    try {
-      const payload = await request.validateUsing(authRegisterValidator);
-      const user = await User.create(payload);
-      return response.ok({ user });
-    } catch (error) {
-      return response.badRequest({ message: error.message });
-    }
+    const payload = await request.validateUsing(authRegisterValidator);
+    const user = await User.create(payload);
+    return response.created({ user });
   }
 
+  /**
+   * Validate user credentials and return a new access token
+   */
   async login({ request, response }: HttpContext) {
     try {
       const payload = await request.validateUsing(authLoginValidator);
@@ -29,7 +29,9 @@ export default class AuthController {
       const token = await User.accessTokens.create(user, ['*'], { expiresIn: '1 day' });
       return response.ok({ user, token });
     } catch (error) {
-      console.error(error.message);
+      if (error.code !== 'E_INVALID_CREDENTIALS') {
+        console.error(error.message);
+      }
       return response.unauthorized({ message: 'Invalid credentials' });
     }
   }

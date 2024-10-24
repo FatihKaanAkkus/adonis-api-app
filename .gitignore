@@ -19,7 +19,10 @@ yarn-error.log
 # Editors specific
 .fleet
 .idea
-.vscode
+.vscode/**
+!/.vscode/settings.json
+!/.vscode/tasks.json
+!/.vscode/launch.json
 
 # Platform specific
 .DS_Store

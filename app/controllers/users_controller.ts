@@ -12,7 +12,7 @@ export default class UsersController {
    * Display a list of resource
    */
   async index({ request, response }: HttpContext) {
-    const { page = 1, perPage = 10 } = await userIndexValidator.validate(request.all());
+    const { page = 1, perPage = 10 } = await request.validateUsing(userIndexValidator);
     const users = await User.query().paginate(page, perPage);
     return response.ok(users);
   }
@@ -21,7 +21,7 @@ export default class UsersController {
    * Handle form submission for the create action
    */
   async store({ request, response }: HttpContext) {
-    const payload = await userStoreValidator.validate(request.all());
+    const payload = await request.validateUsing(userStoreValidator);
     const user = await User.create(payload);
     return response.created(user);
   }
@@ -29,19 +29,19 @@ export default class UsersController {
   /**
    * Show individual record
    */
-  async show({ params, response }: HttpContext) {
-    const payload = await userShowValidator.validate(params);
-    const user = await User.findOrFail(payload.id);
+  async show({ request, response }: HttpContext) {
+    const { params } = await request.validateUsing(userShowValidator);
+    const user = await User.findOrFail(params.id);
     return response.ok(user);
   }
 
   /**
    * Handle form submission for the edit action
    */
-  async update({ params, request, response }: HttpContext) {
-    const meta = await userShowValidator.validate(params);
-    const payload = await userUpdateValidator.validate(request.all(), { meta });
-    const user = await User.findOrFail(meta.id);
+  async update({ request, response }: HttpContext) {
+    const { params } = await request.validateUsing(userShowValidator);
+    const payload = await userUpdateValidator.validate(request.all(), { meta: params });
+    const user = await User.findOrFail(params.id);
     user.merge(payload);
     await user.save();
     return response.ok(user);
@@ -50,9 +50,9 @@ export default class UsersController {
   /**
    * Delete record
    */
-  async destroy({ params, response }: HttpContext) {
-    const payload = await userShowValidator.validate(params);
-    const user = await User.findOrFail(payload.id);
+  async destroy({ request, response }: HttpContext) {
+    const { params } = await request.validateUsing(userShowValidator);
+    const user = await User.findOrFail(params.id);
     await user.delete();
     return response.ok({ message: 'User deleted' });
   }
