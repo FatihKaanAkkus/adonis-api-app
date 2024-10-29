@@ -40,7 +40,7 @@ export default class UsersController {
    */
   async update({ request, response }: HttpContext) {
     const { params } = await request.validateUsing(userShowValidator);
-    const payload = await userUpdateValidator.validate(request.all(), { meta: params });
+    const payload = await request.validateUsing(userUpdateValidator, { meta: params });
     const user = await User.findOrFail(params.id);
     user.merge(payload);
     await user.save();
