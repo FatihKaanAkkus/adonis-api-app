@@ -39,8 +39,28 @@ router
       .use('*', middleware.auth({ guards: ['api'] }));
 
     router
+      .group(() => {
+        router.get('/', [CategoriesController, 'index']).as('index');
+        router.post('/', [CategoriesController, 'store']).as('store');
+        router.delete('/', [CategoriesController, 'destroy']).as('destroy');
+      })
+      .prefix('posts/:post_id/categories')
+      .as('posts.categories')
+      .use(middleware.auth({ guards: ['api'] }));
+
+    router
       .resource('categories', CategoriesController)
       .apiOnly()
       .use('*', middleware.auth({ guards: ['api'] }));
+
+    router
+      .group(() => {
+        router.get('/', [PostsController, 'index']).as('index');
+        router.post('/', [PostsController, 'store']).as('store');
+        router.delete('/', [PostsController, 'destroy']).as('destroy');
+      })
+      .prefix('categories/:category_id/posts')
+      .as('categories.posts')
+      .use(middleware.auth({ guards: ['api'] }));
   })
   .prefix('v1');

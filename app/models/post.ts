@@ -29,7 +29,7 @@ export default class Post extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime;
 
-  @manyToMany(() => Category)
+  @manyToMany(() => Category, { pivotTimestamps: true })
   declare categories: ManyToMany<typeof Category>;
 
   @belongsTo(() => User)

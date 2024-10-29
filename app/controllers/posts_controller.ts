@@ -1,5 +1,9 @@
+import Category from '#models/category';
 import Post from '#models/post';
 import {
+  postDestroyValidator,
+  postIdsDestroyValidator,
+  postIdsStoreValidator,
   postIndexValidator,
   postShowValidator,
   postStoreValidator,
@@ -12,7 +16,19 @@ export default class PostsController {
    * Display a list of resource
    */
   async index({ request, response }: HttpContext) {
-    const { page = 1, perPage = 10 } = await request.validateUsing(postIndexValidator);
+    const { params, page = 1, perPage = 10 } = await request.validateUsing(postIndexValidator);
+
+    if (params.category_id) {
+      const posts = await Post.query()
+        .whereHas('categories', (categoriesQuery) => {
+          categoriesQuery.where('categories.id', params.category_id!);
+        })
+        .preload('user')
+        .preload('categories')
+        .exec();
+      return response.ok(posts);
+    }
+
     const posts = await Post.query().preload('user').preload('categories').paginate(page, perPage);
     return response.ok(posts);
   }
@@ -21,7 +37,29 @@ export default class PostsController {
    * Handle form submission for the create action
    */
   async store({ request, response }: HttpContext) {
-    const payload = await request.validateUsing(postStoreValidator);
+    const { params, ...payload } = await request.validateUsing(postStoreValidator);
+
+    if (params.category_id) {
+      const { postIds } = await request.validateUsing(postIdsStoreValidator, {
+        meta: { category_id: params.category_id },
+      });
+
+      if (!postIds) {
+        return response.badRequest({
+          message: 'Field postIds must be provided when attaching posts to a category',
+        });
+      }
+
+      const postQuery = Post.query();
+      for (const postId of postIds) {
+        postQuery.orWhere('id', postId);
+      }
+      const ids = (await postQuery.exec()).map((post) => post.id);
+      const category = await Category.findOrFail(params.category_id);
+      await category.related('posts').attach(ids);
+      return response.ok(postIds);
+    }
+
     const post = await Post.create(payload);
     return response.created(post);
   }
@@ -33,6 +71,7 @@ export default class PostsController {
     const { params } = await request.validateUsing(postShowValidator);
     const post = await Post.findOrFail(params.id);
     await post.load('user');
+    await post.load('categories');
     return response.ok(post);
   }
 
@@ -52,7 +91,29 @@ export default class PostsController {
    * Delete record
    */
   async destroy({ request, response }: HttpContext) {
-    const { params } = await request.validateUsing(postShowValidator);
+    const { params } = await request.validateUsing(postDestroyValidator);
+
+    if (params.category_id) {
+      const { postIds } = await request.validateUsing(postIdsDestroyValidator, {
+        meta: { category_id: params.category_id },
+      });
+
+      if (!postIds) {
+        return response.badRequest({
+          message: 'Field postIds must be provided when detaching posts from a category',
+        });
+      }
+
+      const postQuery = Post.query();
+      for (const postId of postIds) {
+        postQuery.orWhere('id', postId);
+      }
+      const ids = await postQuery.exec();
+      const category = await Category.findOrFail(params.category_id);
+      await category.related('posts').detach(ids.map((post) => post.id));
+      return response.ok(postIds);
+    }
+
     const post = await Post.findOrFail(params.id);
     await post.delete();
     return response.ok({ message: 'Post deleted' });
