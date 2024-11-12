@@ -1,9 +1,15 @@
 import vine from '@vinejs/vine';
 
+const categoryUri = () =>
+  vine.string().trim().alphaNumeric({ allowDashes: true, allowUnderscores: true });
+
 export const categoryIndexValidator = vine.compile(
   vine.object({
     page: vine.number().positive().withoutDecimals().optional(),
     perPage: vine.number().positive().withoutDecimals().max(100).optional(),
+    withPosts: vine.boolean().optional(),
+    uri: vine.string().trim().ascii().escape().optional(),
+    name: vine.string().trim().ascii().escape().optional(),
 
     params: vine.object({
       post_id: vine
@@ -20,9 +26,7 @@ export const categoryIndexValidator = vine.compile(
 
 export const categoryStoreValidator = vine.compile(
   vine.object({
-    uri: vine
-      .string()
-      .escape()
+    uri: categoryUri()
       .unique(async (db, value) => {
         return !(await db.from('categories').where('uri', value).first());
       })
@@ -60,16 +64,13 @@ export const categoryShowValidator = vine.compile(
 
 export const categoryUpdateValidator = vine.withMetaData<{ id: number }>().compile(
   vine.object({
-    uri: vine
-      .string()
-      .escape()
-      .unique(async (db, value, field) => {
-        return !(await db
-          .from('categories')
-          .where('uri', value)
-          .whereNot('id', field.meta.id)
-          .first());
-      }),
+    uri: categoryUri().unique(async (db, value, field) => {
+      return !(await db
+        .from('categories')
+        .where('uri', value)
+        .whereNot('id', field.meta.id)
+        .first());
+    }),
     name: vine.string(),
     description: vine.string().nullable(),
   })
@@ -127,10 +128,7 @@ export const categoryIdsStoreValidator = vine.withMetaData<{ post_id: number }>(
       .optional(),
     categoryUris: vine
       .array(
-        vine
-          .string()
-          .trim()
-          .escape()
+        categoryUri()
           .exists(async (db, value) => {
             return !!(await db.from('categories').where('uri', value).first());
           })
@@ -173,10 +171,7 @@ export const categoryIdsDestroyValidator = vine.withMetaData<{ post_id: number }
       .optional(),
     categoryUris: vine
       .array(
-        vine
-          .string()
-          .trim()
-          .escape()
+        categoryUri()
           .exists(async (db, value) => {
             return !!(await db.from('categories').where('uri', value).first());
           })

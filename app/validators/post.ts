@@ -4,6 +4,13 @@ export const postIndexValidator = vine.compile(
   vine.object({
     page: vine.number().positive().withoutDecimals().optional(),
     perPage: vine.number().positive().withoutDecimals().max(100).optional(),
+    withCategories: vine.boolean().optional(),
+    uri: vine.string().trim().ascii().escape().maxLength(255).optional(),
+    title: vine.string().trim().ascii().escape().maxLength(255).optional(),
+    description: vine.string().trim().ascii().escape().maxLength(255).optional(),
+    userId: vine.number().positive().withoutDecimals().optional(),
+    // @todo older then
+    // @todo newer then
 
     params: vine.object({
       category_id: vine

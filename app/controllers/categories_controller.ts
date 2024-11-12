@@ -16,7 +16,14 @@ export default class CategoriesController {
    * Display a list of resource
    */
   async index({ request, response }: HttpContext) {
-    const { params, page = 1, perPage = 10 } = await request.validateUsing(categoryIndexValidator);
+    const {
+      params,
+      page = 1,
+      perPage = 10,
+      withPosts = false,
+      uri,
+      name,
+    } = await request.validateUsing(categoryIndexValidator);
 
     if (params.post_id) {
       const categories = await Category.query()
@@ -29,7 +36,25 @@ export default class CategoriesController {
       return response.ok(categories);
     }
 
-    const categories = await Category.query().preload('posts').paginate(page, perPage);
+    const query = Category.query();
+    if (uri) {
+      if (uri.startsWith('%')) {
+        query.whereLike('uri', uri);
+      } else {
+        query.where('uri', uri);
+      }
+    }
+    if (name) {
+      if (name.startsWith('%')) {
+        query.whereLike('name', name);
+      } else {
+        query.where('name', name);
+      }
+    }
+    if (withPosts) {
+      query.preload('posts');
+    }
+    const categories = await query.paginate(page, perPage);
     return response.ok(categories);
   }
 

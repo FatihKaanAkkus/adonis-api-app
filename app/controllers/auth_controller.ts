@@ -7,8 +7,10 @@ export default class AuthController {
    * Register a new user
    */
   async register({ request, response }: HttpContext) {
-    const payload = await request.validateUsing(authRegisterValidator);
+    const { profile = {}, ...payload } = await request.validateUsing(authRegisterValidator);
     const user = await User.create(payload);
+    await user.related('profile').create(profile);
+    await user.load('profile');
     return response.created({ user });
   }
 
@@ -19,6 +21,7 @@ export default class AuthController {
     try {
       const payload = await request.validateUsing(authLoginValidator);
       const user = await User.verifyCredentials(payload.email, payload.password);
+      await user.load('profile');
 
       // Allow only one token per user
       const tokens = await User.accessTokens.all(user);

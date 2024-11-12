@@ -11,6 +11,12 @@ export const authRegisterValidator = vine.compile(
       }),
     password: vine.string().minLength(6),
     fullName: vine.string().nullable().optional(),
+    profile: vine
+      .object({
+        avatarUri: vine.string().nullable().optional(),
+        bio: vine.string().nullable().optional(),
+      })
+      .optional(),
   })
 );
 

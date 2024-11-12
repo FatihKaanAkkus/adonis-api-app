@@ -14,6 +14,7 @@ const AuthController = () => import('#controllers/auth_controller');
 const UsersController = () => import('#controllers/users_controller');
 const PostsController = () => import('#controllers/posts_controller');
 const CategoriesController = () => import('#controllers/categories_controller');
+const SettingsController = () => import('#controllers/settings_controller');
 
 router.get('/', () => ({ versions: [{ version: 'v1' }] }));
 
@@ -62,5 +63,10 @@ router
       .prefix('categories/:category_id/posts')
       .as('categories.posts')
       .use(middleware.auth({ guards: ['api'] }));
+
+    router
+      .resource('settings', SettingsController)
+      .apiOnly()
+      .use('*', middleware.auth({ guards: ['api'] }));
   })
   .prefix('v1');

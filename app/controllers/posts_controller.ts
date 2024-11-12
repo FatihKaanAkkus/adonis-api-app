@@ -16,7 +16,16 @@ export default class PostsController {
    * Display a list of resource
    */
   async index({ request, response }: HttpContext) {
-    const { params, page = 1, perPage = 10 } = await request.validateUsing(postIndexValidator);
+    const {
+      params,
+      page = 1,
+      perPage = 10,
+      withCategories = true,
+      uri,
+      title,
+      description,
+      userId,
+    } = await request.validateUsing(postIndexValidator);
 
     if (params.category_id) {
       const posts = await Post.query()
@@ -29,7 +38,36 @@ export default class PostsController {
       return response.ok(posts);
     }
 
-    const posts = await Post.query().preload('user').preload('categories').paginate(page, perPage);
+    const query = Post.query();
+    if (uri) {
+      if (uri.startsWith('%')) {
+        query.whereLike('uri', uri);
+      } else {
+        query.where('uri', uri);
+      }
+    }
+    if (title) {
+      if (title.startsWith('%')) {
+        query.whereLike('title', title);
+      } else {
+        query.where('title', title);
+      }
+    }
+    if (description) {
+      if (description.startsWith('%')) {
+        query.whereLike('description', description);
+      } else {
+        query.where('description', description);
+      }
+    }
+    if (userId) {
+      query.where('user_id', userId);
+    }
+    query.preload('user');
+    if (withCategories) {
+      query.preload('categories');
+    }
+    const posts = await query.paginate(page, perPage);
     return response.ok(posts);
   }
 
