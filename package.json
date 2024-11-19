@@ -9,6 +9,8 @@
     "build": "node ace build",
     "dev": "node ace serve --hmr",
     "test": "node ace test",
+    "db-migrate": "node ace migration:run",
+    "db-seed": "node ace db:seed",
     "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit"
