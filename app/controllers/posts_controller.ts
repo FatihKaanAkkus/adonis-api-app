@@ -21,6 +21,7 @@ export default class PostsController {
       page = 1,
       perPage = 10,
       withCategories = true,
+      type = 'post',
       uri,
       title,
       description,
@@ -39,6 +40,13 @@ export default class PostsController {
     }
 
     const query = Post.query();
+    if (type) {
+      if (type.startsWith('%')) {
+        query.whereLike('type', type);
+      } else {
+        query.where('type', type);
+      }
+    }
     if (uri) {
       if (uri.startsWith('%')) {
         query.whereLike('uri', uri);

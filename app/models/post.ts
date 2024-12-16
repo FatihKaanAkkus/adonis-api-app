@@ -4,12 +4,14 @@ import type { BelongsTo, ManyToMany } from '@adonisjs/lucid/types/relations';
 import Category from '#models/category';
 import User from '#models/user';
 
+export type PostType = 'post' | 'page';
+
 export default class Post extends BaseModel {
   @column({ isPrimary: true })
   declare id: number;
 
   @column()
-  declare userId: number | null;
+  declare type: PostType;
 
   @column()
   declare uri: string;
@@ -22,6 +24,9 @@ export default class Post extends BaseModel {
 
   @column()
   declare content: string;
+
+  @column()
+  declare userId: number | null;
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime;
