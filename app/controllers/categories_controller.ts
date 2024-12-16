@@ -149,9 +149,9 @@ export default class CategoriesController {
           categoryQuery.orWhere('uri', categoryUri);
         }
       }
-      const categories = await categoryQuery.exec();
+      const ids = (await categoryQuery.exec()).map((category) => category.id);
       const post = await Post.findOrFail(params.post_id);
-      await post.related('categories').detach(categories.map((category) => category.id));
+      await post.related('categories').detach(ids);
       return response.ok(categoryIds || categoryUris);
     }
 

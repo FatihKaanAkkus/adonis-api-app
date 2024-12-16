@@ -14,6 +14,7 @@ const AuthController = () => import('#controllers/auth_controller');
 const UsersController = () => import('#controllers/users_controller');
 const PostsController = () => import('#controllers/posts_controller');
 const CategoriesController = () => import('#controllers/categories_controller');
+const AttachmentsController = () => import('#controllers/attachments_controller');
 const SettingsController = () => import('#controllers/settings_controller');
 
 router.get('/', () => ({ versions: [{ version: 'v1' }] }));
@@ -50,6 +51,16 @@ router
       .use(middleware.auth({ guards: ['api'] }));
 
     router
+      .group(() => {
+        router.get('/', [AttachmentsController, 'index']).as('index');
+        router.post('/', [AttachmentsController, 'store']).as('store');
+        router.delete('/', [AttachmentsController, 'destroy']).as('destroy');
+      })
+      .prefix('posts/:post_id/attachments')
+      .as('posts.attachments')
+      .use(middleware.auth({ guards: ['api'] }));
+
+    router
       .resource('categories', CategoriesController)
       .apiOnly()
       .use('*', middleware.auth({ guards: ['api'] }));
@@ -62,6 +73,21 @@ router
       })
       .prefix('categories/:category_id/posts')
       .as('categories.posts')
+      .use(middleware.auth({ guards: ['api'] }));
+
+    router
+      .resource('attachments', AttachmentsController)
+      .apiOnly()
+      .use('*', middleware.auth({ guards: ['api'] }));
+
+    router
+      .group(() => {
+        router.get('/', [PostsController, 'index']).as('index');
+        router.post('/', [PostsController, 'store']).as('store');
+        router.delete('/', [PostsController, 'destroy']).as('destroy');
+      })
+      .prefix('attachments/:attachment_id/posts')
+      .as('attachments.posts')
       .use(middleware.auth({ guards: ['api'] }));
 
     router

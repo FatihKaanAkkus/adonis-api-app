@@ -5,5 +5,6 @@ export default class extends BaseSeeder {
   async run() {
     await PostFactory.with('user').createMany(10);
     await PostFactory.with('user').with('categories', 3).createMany(10);
+    await PostFactory.with('user').with('attachments', 3).createMany(10);
   }
 }

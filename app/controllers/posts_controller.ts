@@ -1,3 +1,4 @@
+import Attachment from '#models/attachment';
 import Category from '#models/category';
 import Post from '#models/post';
 import {
@@ -21,6 +22,7 @@ export default class PostsController {
       page = 1,
       perPage = 10,
       withCategories = true,
+      withAttachments = false,
       type = 'post',
       uri,
       title,
@@ -35,6 +37,17 @@ export default class PostsController {
         })
         .preload('user')
         .preload('categories')
+        .exec();
+      return response.ok(posts);
+    }
+    if (params.attachment_id) {
+      const posts = await Post.query()
+        .whereHas('attachments', (attachmentsQuery) => {
+          attachmentsQuery.where('attachments.id', params.attachment_id!);
+        })
+        .preload('user')
+        .preload('categories')
+        .preload('attachments')
         .exec();
       return response.ok(posts);
     }
@@ -75,6 +88,10 @@ export default class PostsController {
     if (withCategories) {
       query.preload('categories');
     }
+    query.has('attachments', '>', 0);
+    if (withAttachments) {
+      query.preload('attachments');
+    }
     const posts = await query.paginate(page, perPage);
     return response.ok(posts);
   }
@@ -103,6 +120,27 @@ export default class PostsController {
       const ids = (await postQuery.exec()).map((post) => post.id);
       const category = await Category.findOrFail(params.category_id);
       await category.related('posts').attach(ids);
+      return response.ok(postIds);
+    }
+
+    if (params.attachment_id) {
+      const { postIds } = await request.validateUsing(postIdsStoreValidator, {
+        meta: { attachment_id: params.attachment_id },
+      });
+
+      if (!postIds) {
+        return response.badRequest({
+          message: 'Field postIds must be provided when attaching posts to an attachment',
+        });
+      }
+
+      const postQuery = Post.query();
+      for (const postId of postIds) {
+        postQuery.orWhere('id', postId);
+      }
+      const ids = (await postQuery.exec()).map((post) => post.id);
+      const attachment = await Attachment.findOrFail(params.attachment_id);
+      await attachment.related('posts').attach(ids);
       return response.ok(postIds);
     }
 
@@ -157,6 +195,27 @@ export default class PostsController {
       const ids = await postQuery.exec();
       const category = await Category.findOrFail(params.category_id);
       await category.related('posts').detach(ids.map((post) => post.id));
+      return response.ok(postIds);
+    }
+
+    if (params.attachment_id) {
+      const { postIds } = await request.validateUsing(postIdsDestroyValidator, {
+        meta: { attachment_id: params.attachment_id },
+      });
+
+      if (!postIds) {
+        return response.badRequest({
+          message: 'Field postIds must be provided when detaching posts from an attachment',
+        });
+      }
+
+      const postQuery = Post.query();
+      for (const postId of postIds) {
+        postQuery.orWhere('id', postId);
+      }
+      const ids = (await postQuery.exec()).map((post) => post.id);
+      const attachment = await Attachment.findOrFail(params.attachment_id);
+      await attachment.related('posts').detach(ids);
       return response.ok(postIds);
     }
 

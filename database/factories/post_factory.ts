@@ -1,7 +1,8 @@
-import { CategoryFactory } from '#database/factories/category_factory';
-import { UserFactory } from '#database/factories/user_factory';
 import Post, { PostType } from '#models/post';
 import factory from '@adonisjs/lucid/factories';
+import { UserFactory } from '#database/factories/user_factory';
+import { CategoryFactory } from '#database/factories/category_factory';
+import { AttachmentFactory } from '#database/factories/attachment_factory';
 
 export const PostFactory = factory
   .define(Post, async ({ faker }) => {
@@ -13,6 +14,7 @@ export const PostFactory = factory
       description: faker.lorem.sentence(),
     };
   })
-  .relation('categories', () => CategoryFactory)
   .relation('user', () => UserFactory)
+  .relation('categories', () => CategoryFactory)
+  .relation('attachments', () => AttachmentFactory)
   .build();
