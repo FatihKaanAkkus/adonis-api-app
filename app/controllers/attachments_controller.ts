@@ -21,6 +21,7 @@ export default class AttachmentsController {
       page = 1,
       perPage = 10,
       withPosts = false,
+      hasPosts = false,
       ext,
       path,
       title,
@@ -58,6 +59,9 @@ export default class AttachmentsController {
       } else {
         query.where('title', title);
       }
+    }
+    if (hasPosts) {
+      query.has('posts', '>', 0);
     }
     if (withPosts) {
       query.preload('posts');

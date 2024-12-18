@@ -22,7 +22,9 @@ export default class PostsController {
       page = 1,
       perPage = 10,
       withCategories = true,
+      hasCategories = false,
       withAttachments = false,
+      hasAttachments = false,
       type = 'post',
       uri,
       title,
@@ -85,10 +87,15 @@ export default class PostsController {
       query.where('user_id', userId);
     }
     query.preload('user');
+    if (hasCategories) {
+      query.has('categories', '>', 0);
+    }
     if (withCategories) {
       query.preload('categories');
     }
-    query.has('attachments', '>', 0);
+    if (hasAttachments) {
+      query.has('attachments', '>', 0);
+    }
     if (withAttachments) {
       query.preload('attachments');
     }

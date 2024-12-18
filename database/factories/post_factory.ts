@@ -17,4 +17,6 @@ export const PostFactory = factory
   .relation('user', () => UserFactory)
   .relation('categories', () => CategoryFactory)
   .relation('attachments', () => AttachmentFactory)
+  .state('post', (post) => (post.type = 'post'))
+  .state('page', (post) => (post.type = 'page'))
   .build();

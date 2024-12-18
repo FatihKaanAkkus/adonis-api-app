@@ -16,6 +16,7 @@ export default class UsersController {
       page = 1,
       perPage = 10,
       withPosts = false,
+      hasPosts = false,
       email,
       fullName,
     } = await request.validateUsing(userIndexValidator);
@@ -34,6 +35,9 @@ export default class UsersController {
       } else {
         query.where('fullName', fullName);
       }
+    }
+    if (hasPosts) {
+      query.has('posts', '>', 0);
     }
     if (withPosts) {
       query.preload('posts', (postsQuery) => {

@@ -21,6 +21,7 @@ export default class CategoriesController {
       page = 1,
       perPage = 10,
       withPosts = false,
+      hasPosts = false,
       uri,
       name,
     } = await request.validateUsing(categoryIndexValidator);
@@ -50,6 +51,9 @@ export default class CategoriesController {
       } else {
         query.where('name', name);
       }
+    }
+    if (hasPosts) {
+      query.has('posts', '>', 0);
     }
     if (withPosts) {
       query.preload('posts');

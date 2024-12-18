@@ -38,61 +38,81 @@ router
     router
       .resource('posts', PostsController)
       .apiOnly()
-      .use('*', middleware.auth({ guards: ['api'] }));
+      .use(['store', 'update', 'destroy'], middleware.auth({ guards: ['api'] }));
 
     router
       .group(() => {
         router.get('/', [CategoriesController, 'index']).as('index');
-        router.post('/', [CategoriesController, 'store']).as('store');
-        router.delete('/', [CategoriesController, 'destroy']).as('destroy');
+        router
+          .post('/', [CategoriesController, 'store'])
+          .as('store')
+          .use(middleware.auth({ guards: ['api'] }));
+        router
+          .delete('/', [CategoriesController, 'destroy'])
+          .as('destroy')
+          .use(middleware.auth({ guards: ['api'] }));
       })
       .prefix('posts/:post_id/categories')
-      .as('posts.categories')
-      .use(middleware.auth({ guards: ['api'] }));
+      .as('posts.categories');
 
     router
       .group(() => {
         router.get('/', [AttachmentsController, 'index']).as('index');
-        router.post('/', [AttachmentsController, 'store']).as('store');
-        router.delete('/', [AttachmentsController, 'destroy']).as('destroy');
+        router
+          .post('/', [AttachmentsController, 'store'])
+          .as('store')
+          .use(middleware.auth({ guards: ['api'] }));
+        router
+          .delete('/', [AttachmentsController, 'destroy'])
+          .as('destroy')
+          .use(middleware.auth({ guards: ['api'] }));
       })
       .prefix('posts/:post_id/attachments')
-      .as('posts.attachments')
-      .use(middleware.auth({ guards: ['api'] }));
+      .as('posts.attachments');
 
     router
       .resource('categories', CategoriesController)
       .apiOnly()
-      .use('*', middleware.auth({ guards: ['api'] }));
+      .use(['store', 'update', 'destroy'], middleware.auth({ guards: ['api'] }));
 
     router
       .group(() => {
         router.get('/', [PostsController, 'index']).as('index');
-        router.post('/', [PostsController, 'store']).as('store');
-        router.delete('/', [PostsController, 'destroy']).as('destroy');
+        router
+          .post('/', [PostsController, 'store'])
+          .as('store')
+          .use(middleware.auth({ guards: ['api'] }));
+        router
+          .delete('/', [PostsController, 'destroy'])
+          .as('destroy')
+          .use(middleware.auth({ guards: ['api'] }));
       })
       .prefix('categories/:category_id/posts')
-      .as('categories.posts')
-      .use(middleware.auth({ guards: ['api'] }));
+      .as('categories.posts');
 
     router
       .resource('attachments', AttachmentsController)
       .apiOnly()
-      .use('*', middleware.auth({ guards: ['api'] }));
+      .use(['store', 'update', 'destroy'], middleware.auth({ guards: ['api'] }));
 
     router
       .group(() => {
         router.get('/', [PostsController, 'index']).as('index');
-        router.post('/', [PostsController, 'store']).as('store');
-        router.delete('/', [PostsController, 'destroy']).as('destroy');
+        router
+          .post('/', [PostsController, 'store'])
+          .as('store')
+          .use(middleware.auth({ guards: ['api'] }));
+        router
+          .delete('/', [PostsController, 'destroy'])
+          .as('destroy')
+          .use(middleware.auth({ guards: ['api'] }));
       })
       .prefix('attachments/:attachment_id/posts')
-      .as('attachments.posts')
-      .use(middleware.auth({ guards: ['api'] }));
+      .as('attachments.posts');
 
     router
       .resource('settings', SettingsController)
       .apiOnly()
-      .use('*', middleware.auth({ guards: ['api'] }));
+      .use(['store', 'update', 'destroy'], middleware.auth({ guards: ['api'] }));
   })
   .prefix('v1');

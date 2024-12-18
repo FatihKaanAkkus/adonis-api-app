@@ -5,6 +5,7 @@ export const attachmentIndexValidator = vine.compile(
     page: vine.number().positive().withoutDecimals().optional(),
     perPage: vine.number().positive().withoutDecimals().max(100).optional(),
     withPosts: vine.boolean().optional(),
+    hasPosts: vine.boolean().optional(),
     ext: vine.string().trim().ascii().escape().optional(),
     path: vine.string().trim().ascii().escape().optional(),
     title: vine.string().optional(),

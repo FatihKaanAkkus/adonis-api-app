@@ -8,6 +8,7 @@ export const categoryIndexValidator = vine.compile(
     page: vine.number().positive().withoutDecimals().optional(),
     perPage: vine.number().positive().withoutDecimals().max(100).optional(),
     withPosts: vine.boolean().optional(),
+    hasPosts: vine.boolean().optional(),
     uri: vine.string().trim().ascii().escape().optional(),
     name: vine.string().trim().ascii().escape().optional(),
 

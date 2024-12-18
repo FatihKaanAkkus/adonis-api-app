@@ -5,7 +5,9 @@ export const postIndexValidator = vine.compile(
     page: vine.number().positive().withoutDecimals().optional(),
     perPage: vine.number().positive().withoutDecimals().max(100).optional(),
     withCategories: vine.boolean().optional(),
+    hasCategories: vine.boolean().optional(),
     withAttachments: vine.boolean().optional(),
+    hasAttachments: vine.boolean().optional(),
     type: vine.enum(['post', 'page']).optional(),
     uri: vine.string().trim().ascii().escape().maxLength(255).optional(),
     title: vine.string().trim().ascii().escape().maxLength(255).optional(),
@@ -29,7 +31,8 @@ export const postIndexValidator = vine.compile(
         .withoutDecimals()
         .exists(async (db, value) => {
           return !!(await db.from('attachments').where('id', value).first());
-        }),
+        })
+        .optional(),
     }),
   })
 );

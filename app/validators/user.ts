@@ -11,6 +11,7 @@ export const userIndexValidator = vine.compile(
     page: vine.number().positive().withoutDecimals().optional(),
     perPage: vine.number().positive().withoutDecimals().max(100).optional(),
     withPosts: vine.boolean().optional(),
+    hasPosts: vine.boolean().optional(),
     email: vine.string().trim().ascii().escape().maxLength(254).optional(),
     fullName: vine.string().trim().ascii().escape().optional(),
   })
