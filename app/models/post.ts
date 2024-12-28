@@ -27,6 +27,9 @@ export default class Post extends BaseModel {
   declare content: string;
 
   @column()
+  declare coverImage: string | null;
+
+  @column()
   declare userId: number | null;
 
   @column.dateTime({ autoCreate: true })

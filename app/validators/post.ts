@@ -64,6 +64,11 @@ export const postStoreValidator = vine.compile(
       .string()
       .optional()
       .requiredIfMissing(['params.category_id', 'params.attachment_id']),
+    coverImage: vine
+      .string()
+      .nullable()
+      .optional()
+      .requiredIfMissing(['params.category_id', 'params.attachment_id']),
     userId: vine
       .number()
       .positive()
@@ -120,6 +125,7 @@ export const postUpdateValidator = vine.withMetaData<{ id: number }>().compile(
     title: vine.string().optional(),
     description: vine.string().nullable().optional(),
     content: vine.string().optional(),
+    coverImage: vine.string().nullable().optional(),
     userId: vine.number().positive().withoutDecimals().nullable().optional(),
   })
 );

@@ -12,6 +12,7 @@ export const PostFactory = factory
       title: faker.lorem.sentence(),
       content: faker.lorem.paragraphs(3),
       description: faker.lorem.sentence(),
+      coverImage: faker.image.url(),
     };
   })
   .relation('user', () => UserFactory)
