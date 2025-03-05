@@ -30,6 +30,7 @@ export default class PostsController {
       title,
       description,
       userId,
+      category,
     } = await request.validateUsing(postIndexValidator);
 
     if (params.category_id) {
@@ -98,6 +99,15 @@ export default class PostsController {
     }
     if (withAttachments) {
       query.preload('attachments');
+    }
+    if (category) {
+      query.whereHas('categories', (categoriesQuery) => {
+        if (category.startsWith('%')) {
+          categoriesQuery.whereLike('uri', category);
+        } else {
+          categoriesQuery.where('uri', category);
+        }
+      });
     }
     const posts = await query.paginate(page, perPage);
     return response.ok(posts);

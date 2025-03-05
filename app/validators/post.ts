@@ -13,6 +13,7 @@ export const postIndexValidator = vine.compile(
     title: vine.string().trim().ascii().escape().maxLength(255).optional(),
     description: vine.string().trim().ascii().escape().maxLength(255).optional(),
     userId: vine.number().positive().withoutDecimals().optional(),
+    category: vine.string().trim().ascii().escape().maxLength(255).optional(),
     // @todo older then
     // @todo newer then
 
