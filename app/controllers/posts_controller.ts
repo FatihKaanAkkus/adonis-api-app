@@ -12,7 +12,20 @@ import {
   postUpdateValidator,
 } from '#validators/post';
 import type { HttpContext } from '@adonisjs/core/http';
+import type { ModelPaginatorContract } from '@adonisjs/lucid/types/model';
 import vine from '@vinejs/vine';
+
+function serializePost(modelOrQuery: ModelPaginatorContract<Post> | Post) {
+  return modelOrQuery.serialize({
+    fields: { omit: ['userId'] },
+    relations: {
+      user: { fields: ['fullName'] },
+      categories: { fields: ['name', 'uri'] },
+      attachments: { fields: ['path', 'title', 'ext'] },
+      posts: { fields: { omit: ['userId'] } },
+    },
+  });
+}
 
 export default class PostsController {
   /**
@@ -44,7 +57,7 @@ export default class PostsController {
         .preload('user')
         .preload('categories')
         .exec();
-      return response.ok(posts);
+      return response.ok(posts.map((post) => serializePost(post)));
     }
     if (params.attachment_id) {
       const posts = await Post.query()
@@ -56,7 +69,7 @@ export default class PostsController {
         .preload('categories')
         .preload('attachments')
         .exec();
-      return response.ok(posts);
+      return response.ok(posts.map((post) => serializePost(post)));
     }
 
     const query = Post.query();
@@ -115,7 +128,7 @@ export default class PostsController {
     }
     query.orderBy('created_at', 'desc');
     const posts = await query.paginate(page, perPage);
-    return response.ok(posts);
+    return response.ok(serializePost(posts));
   }
 
   /**
@@ -186,7 +199,7 @@ export default class PostsController {
       if (withAttachments) {
         await post.load('attachments');
       }
-      return response.ok(post);
+      return response.ok(serializePost(post));
     } else {
       const { uri } = await postShowIdValidator.validate({ uri: params.id });
       const post = await Post.findByOrFail('uri', uri);
@@ -195,7 +208,7 @@ export default class PostsController {
       if (withAttachments) {
         await post.load('attachments');
       }
-      return response.ok(post);
+      return response.ok(serializePost(post));
     }
   }
 

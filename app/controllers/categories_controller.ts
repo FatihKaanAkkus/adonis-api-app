@@ -10,6 +10,18 @@ import {
   categoryUpdateValidator,
 } from '#validators/category';
 import type { HttpContext } from '@adonisjs/core/http';
+import type { ModelPaginatorContract } from '@adonisjs/lucid/types/model';
+
+function serializeCategory(modelOrQuery: ModelPaginatorContract<Category> | Category) {
+  return modelOrQuery.serialize({
+    relations: {
+      user: { fields: ['fullName'] },
+      categories: { fields: ['name', 'uri'] },
+      attachments: { fields: ['path', 'title', 'ext'] },
+      posts: { fields: { omit: ['userId'] } },
+    },
+  });
+}
 
 export default class CategoriesController {
   /**
@@ -61,7 +73,7 @@ export default class CategoriesController {
     }
     query.orderBy('created_at', 'desc');
     const categories = await query.paginate(page, perPage);
-    return response.ok(categories);
+    return response.ok(serializeCategory(categories));
   }
 
   /**

@@ -11,7 +11,19 @@ import {
 } from '#validators/attachment';
 import { cuid } from '@adonisjs/core/helpers';
 import type { HttpContext } from '@adonisjs/core/http';
+import type { ModelPaginatorContract } from '@adonisjs/lucid/types/model';
 import drive from '@adonisjs/drive/services/main';
+
+function serializeAttachment(modelOrQuery: ModelPaginatorContract<Attachment> | Attachment) {
+  return modelOrQuery.serialize({
+    relations: {
+      user: { fields: ['fullName'] },
+      categories: { fields: ['name', 'uri'] },
+      attachments: { fields: ['path', 'title', 'ext'] },
+      posts: { fields: { omit: ['userId'] } },
+    },
+  });
+}
 
 export default class AttachmentsController {
   /**
@@ -38,7 +50,7 @@ export default class AttachmentsController {
         })
         .orderBy('created_at', 'desc')
         .exec();
-      return response.ok(attachments);
+      return response.ok(attachments.map((attachment) => serializeAttachment(attachment)));
     }
 
     const query = Attachment.query();
@@ -71,7 +83,7 @@ export default class AttachmentsController {
     }
     query.orderBy('created_at', 'desc');
     const attachments = await query.paginate(page, perPage);
-    return response.ok(attachments);
+    return response.ok(serializeAttachment(attachments));
   }
 
   /**
@@ -124,6 +136,7 @@ export default class AttachmentsController {
       ...payload,
       ext: image.extname,
       path: url,
+      size: image.size,
     });
     return response.created(attachment);
   }
@@ -135,7 +148,7 @@ export default class AttachmentsController {
     const { params } = await request.validateUsing(attachmentShowValidator);
     const attachment = await Attachment.findOrFail(params.id);
     await attachment.load('posts');
-    return response.ok(attachment);
+    return response.ok(serializeAttachment(attachment));
   }
 
   /**

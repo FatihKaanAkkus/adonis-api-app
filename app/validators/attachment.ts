@@ -25,8 +25,6 @@ export const attachmentIndexValidator = vine.compile(
 
 export const attachmentStoreValidator = vine.compile(
   vine.object({
-    ext: vine.string().trim().ascii().escape().optional().requiredIfMissing('params.post_id'),
-    size: vine.number().positive().withoutDecimals().optional().requiredIfMissing('params.post_id'),
     title: vine.string().optional(),
     rename: vine.string().trim().ascii().escape().optional(),
     file: vine
