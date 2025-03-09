@@ -6,11 +6,13 @@ import {
   postIdsDestroyValidator,
   postIdsStoreValidator,
   postIndexValidator,
+  postShowIdValidator,
   postShowValidator,
   postStoreValidator,
   postUpdateValidator,
 } from '#validators/post';
 import type { HttpContext } from '@adonisjs/core/http';
+import vine from '@vinejs/vine';
 
 export default class PostsController {
   /**
@@ -175,13 +177,26 @@ export default class PostsController {
    */
   async show({ request, response }: HttpContext) {
     const { params, withAttachments } = await request.validateUsing(postShowValidator);
-    const post = await Post.findOrFail(params.id);
-    await post.load('user');
-    await post.load('categories');
-    if (withAttachments) {
-      await post.load('attachments');
+
+    if (vine.helpers.isDecimal(params.id)) {
+      const { id } = await postShowIdValidator.validate(params);
+      const post = await Post.findOrFail(id);
+      await post.load('user');
+      await post.load('categories');
+      if (withAttachments) {
+        await post.load('attachments');
+      }
+      return response.ok(post);
+    } else {
+      const { uri } = await postShowIdValidator.validate({ uri: params.id });
+      const post = await Post.findByOrFail('uri', uri);
+      await post.load('user');
+      await post.load('categories');
+      if (withAttachments) {
+        await post.load('attachments');
+      }
+      return response.ok(post);
     }
-    return response.ok(post);
   }
 
   /**

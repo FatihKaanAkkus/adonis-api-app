@@ -104,14 +104,32 @@ export const postShowValidator = vine.compile(
     withAttachments: vine.boolean().optional(),
 
     params: vine.object({
-      id: vine
-        .number()
-        .positive()
-        .withoutDecimals()
-        .exists(async (db, value) => {
-          return !!(await db.from('posts').where('id', value).first());
-        }),
+      id: vine.any(),
     }),
+  })
+);
+
+export const postShowIdValidator = vine.compile(
+  vine.object({
+    uri: vine
+      .string()
+      .trim()
+      .ascii()
+      .escape()
+      .maxLength(255)
+      .exists(async (db, value) => {
+        return !!(await db.from('posts').where('uri', value).first());
+      })
+      .optional(),
+    id: vine
+      .number()
+      .positive()
+      .withoutDecimals()
+      .exists(async (db, value) => {
+        return !!(await db.from('posts').where('id', value).first());
+      })
+      .optional()
+      .requiredIfMissing(['uri']),
   })
 );
 
