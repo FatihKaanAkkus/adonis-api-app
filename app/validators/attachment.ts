@@ -26,18 +26,13 @@ export const attachmentIndexValidator = vine.compile(
 export const attachmentStoreValidator = vine.compile(
   vine.object({
     ext: vine.string().trim().ascii().escape().optional().requiredIfMissing('params.post_id'),
-    path: vine
-      .string()
-      .trim()
-      .ascii()
-      .escape()
-      .unique(async (db, value) => {
-        return !(await db.from('attachments').where('path', value).first());
-      })
-      .optional()
-      .requiredIfMissing('params.post_id'),
     size: vine.number().positive().withoutDecimals().optional().requiredIfMissing('params.post_id'),
     title: vine.string().optional(),
+    rename: vine.string().trim().ascii().escape().optional(),
+    file: vine
+      .file({ extnames: ['jpeg', 'jpg', 'png', 'webp'], size: '10mb' })
+      .optional()
+      .requiredIfMissing('params.post_id'),
 
     params: vine.object({
       post_id: vine

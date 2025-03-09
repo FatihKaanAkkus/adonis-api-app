@@ -33,6 +33,7 @@ export default class CategoriesController {
             postsQuery.where('posts.id', params.post_id);
           }
         })
+        .orderBy('created_at', 'desc')
         .exec();
       return response.ok(categories);
     }
@@ -58,6 +59,7 @@ export default class CategoriesController {
     if (withPosts) {
       query.preload('posts');
     }
+    query.orderBy('created_at', 'desc');
     const categories = await query.paginate(page, perPage);
     return response.ok(categories);
   }
@@ -91,6 +93,7 @@ export default class CategoriesController {
           categoryQuery.orWhere('uri', categoryUri);
         }
       }
+      categoryQuery.orderBy('created_at', 'desc');
       const ids = (await categoryQuery.exec()).map((category) => category.id);
       const post = await Post.findOrFail(params.post_id);
       await post.related('categories').attach(ids);
@@ -153,6 +156,7 @@ export default class CategoriesController {
           categoryQuery.orWhere('uri', categoryUri);
         }
       }
+      categoryQuery.orderBy('created_at', 'desc');
       const ids = (await categoryQuery.exec()).map((category) => category.id);
       const post = await Post.findOrFail(params.post_id);
       await post.related('categories').detach(ids);

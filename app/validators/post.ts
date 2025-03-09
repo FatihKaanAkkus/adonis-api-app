@@ -101,6 +101,8 @@ export const postStoreValidator = vine.compile(
 
 export const postShowValidator = vine.compile(
   vine.object({
+    withAttachments: vine.boolean().optional(),
+
     params: vine.object({
       id: vine
         .number()

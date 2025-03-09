@@ -9,7 +9,9 @@ import {
   attachmentStoreValidator,
   attachmentUpdateValidator,
 } from '#validators/attachment';
+import { cuid } from '@adonisjs/core/helpers';
 import type { HttpContext } from '@adonisjs/core/http';
+import drive from '@adonisjs/drive/services/main';
 
 export default class AttachmentsController {
   /**
@@ -34,6 +36,7 @@ export default class AttachmentsController {
             postsQuery.where('posts.id', params.post_id);
           }
         })
+        .orderBy('created_at', 'desc')
         .exec();
       return response.ok(attachments);
     }
@@ -66,6 +69,7 @@ export default class AttachmentsController {
     if (withPosts) {
       query.preload('posts');
     }
+    query.orderBy('created_at', 'desc');
     const attachments = await query.paginate(page, perPage);
     return response.ok(attachments);
   }
@@ -74,7 +78,8 @@ export default class AttachmentsController {
    * Handle form submission for the create action
    */
   async store({ request, response }: HttpContext) {
-    const { params, ...payload } = await request.validateUsing(attachmentStoreValidator);
+    const { params, rename, file, ...payload } =
+      await request.validateUsing(attachmentStoreValidator);
 
     if (params.post_id) {
       const { attachmentIds } = await request.validateUsing(attachmentIdsStoreValidator, {
@@ -92,13 +97,34 @@ export default class AttachmentsController {
       for (const attachmentId of attachmentIds) {
         attachmentQuery.orWhere('id', attachmentId);
       }
+      attachmentQuery.orderBy('created_at', 'desc');
       const ids = (await attachmentQuery.exec()).map((attachment) => attachment.id);
       const post = await Post.findOrFail(params.post_id);
       await post.related('attachments').attach(ids);
       return response.ok(attachmentIds);
     }
 
-    const attachment = await Attachment.create(payload);
+    const image = request.file('file', { size: '10mb', extnames: ['jpeg', 'jpg', 'png', 'webp'] });
+    if (!image) {
+      return response.badRequest({ message: 'Image file must be provided' });
+    }
+
+    const key = rename
+      ? `uploads/${rename}.${image.extname}`
+      : `uploads/${cuid()}.${image.extname}`;
+
+    if (await drive.use().exists(key)) {
+      return response.badRequest({ message: 'File already exists' });
+    }
+
+    await image.moveToDisk(key);
+    const url = await drive.use().getUrl(key);
+
+    const attachment = await Attachment.create({
+      ...payload,
+      ext: image.extname,
+      path: url,
+    });
     return response.created(attachment);
   }
 
@@ -146,6 +172,7 @@ export default class AttachmentsController {
       for (const attachmentId of attachmentIds) {
         attachmentQuery.orWhere('id', attachmentId);
       }
+      attachmentQuery.orderBy('created_at', 'desc');
       const ids = (await attachmentQuery.exec()).map((attachment) => attachment.id);
       const post = await Post.findOrFail(params.post_id);
       await post.related('attachments').detach(ids);

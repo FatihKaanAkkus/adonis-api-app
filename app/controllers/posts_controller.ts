@@ -38,6 +38,7 @@ export default class PostsController {
         .whereHas('categories', (categoriesQuery) => {
           categoriesQuery.where('categories.id', params.category_id!);
         })
+        .orderBy('created_at', 'desc')
         .preload('user')
         .preload('categories')
         .exec();
@@ -48,6 +49,7 @@ export default class PostsController {
         .whereHas('attachments', (attachmentsQuery) => {
           attachmentsQuery.where('attachments.id', params.attachment_id!);
         })
+        .orderBy('created_at', 'desc')
         .preload('user')
         .preload('categories')
         .preload('attachments')
@@ -109,6 +111,7 @@ export default class PostsController {
         }
       });
     }
+    query.orderBy('created_at', 'desc');
     const posts = await query.paginate(page, perPage);
     return response.ok(posts);
   }
@@ -134,6 +137,7 @@ export default class PostsController {
       for (const postId of postIds) {
         postQuery.orWhere('id', postId);
       }
+      postQuery.orderBy('created_at', 'desc');
       const ids = (await postQuery.exec()).map((post) => post.id);
       const category = await Category.findOrFail(params.category_id);
       await category.related('posts').attach(ids);
@@ -155,6 +159,7 @@ export default class PostsController {
       for (const postId of postIds) {
         postQuery.orWhere('id', postId);
       }
+      postQuery.orderBy('created_at', 'desc');
       const ids = (await postQuery.exec()).map((post) => post.id);
       const attachment = await Attachment.findOrFail(params.attachment_id);
       await attachment.related('posts').attach(ids);
@@ -169,10 +174,13 @@ export default class PostsController {
    * Show individual record
    */
   async show({ request, response }: HttpContext) {
-    const { params } = await request.validateUsing(postShowValidator);
+    const { params, withAttachments } = await request.validateUsing(postShowValidator);
     const post = await Post.findOrFail(params.id);
     await post.load('user');
     await post.load('categories');
+    if (withAttachments) {
+      await post.load('attachments');
+    }
     return response.ok(post);
   }
 
@@ -209,6 +217,7 @@ export default class PostsController {
       for (const postId of postIds) {
         postQuery.orWhere('id', postId);
       }
+      postQuery.orderBy('created_at', 'desc');
       const ids = await postQuery.exec();
       const category = await Category.findOrFail(params.category_id);
       await category.related('posts').detach(ids.map((post) => post.id));
@@ -230,6 +239,7 @@ export default class PostsController {
       for (const postId of postIds) {
         postQuery.orWhere('id', postId);
       }
+      postQuery.orderBy('created_at', 'desc');
       const ids = (await postQuery.exec()).map((post) => post.id);
       const attachment = await Attachment.findOrFail(params.attachment_id);
       await attachment.related('posts').detach(ids);

@@ -44,6 +44,7 @@ export default class UsersController {
         postsQuery.preload('categories');
       });
     }
+    query.orderBy('email', 'asc');
     const users = await query.paginate(page, perPage);
     return response.ok(users);
   }
