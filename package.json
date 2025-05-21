@@ -13,7 +13,10 @@
     "db-seed": "node ace db:seed",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "docker:build": "docker compose up --build --no-start",
+    "docker:up": "docker compose up",
+    "docker:down": "docker compose down"
   },
   "imports": {
     "#controllers/*": "./app/controllers/*.js",

@@ -27,7 +27,7 @@ ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=production-deps /app/node_modules /app/node_modules
 COPY --from=build /app/build /app
-ADD .env.docker /app/.env
+ADD .env.docker.local /app/.env
 
 # Custom post-install steps
 RUN mkdir /app/tmp
