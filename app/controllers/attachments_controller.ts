@@ -110,7 +110,8 @@ export default class AttachmentsController {
         attachmentQuery.orWhere('id', attachmentId);
       }
       attachmentQuery.orderBy('created_at', 'desc');
-      const ids = (await attachmentQuery.exec()).map((attachment) => attachment.id);
+      const attachments = await attachmentQuery.exec();
+      const ids = attachments.map((attachment) => attachment.id);
       const post = await Post.findOrFail(params.post_id);
       await post.related('attachments').attach(ids);
       return response.ok(attachmentIds);
@@ -186,7 +187,8 @@ export default class AttachmentsController {
         attachmentQuery.orWhere('id', attachmentId);
       }
       attachmentQuery.orderBy('created_at', 'desc');
-      const ids = (await attachmentQuery.exec()).map((attachment) => attachment.id);
+      const attachments = await attachmentQuery.exec();
+      const ids = attachments.map((attachment) => attachment.id);
       const post = await Post.findOrFail(params.post_id);
       await post.related('attachments').detach(ids);
       return response.ok(attachmentIds);

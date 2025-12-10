@@ -106,7 +106,8 @@ export default class CategoriesController {
         }
       }
       categoryQuery.orderBy('created_at', 'desc');
-      const ids = (await categoryQuery.exec()).map((category) => category.id);
+      const categories = await categoryQuery.exec();
+      const ids = categories.map((category) => category.id);
       const post = await Post.findOrFail(params.post_id);
       await post.related('categories').attach(ids);
       return response.ok(categoryIds || categoryUris);
@@ -169,7 +170,8 @@ export default class CategoriesController {
         }
       }
       categoryQuery.orderBy('created_at', 'desc');
-      const ids = (await categoryQuery.exec()).map((category) => category.id);
+      const categories = await categoryQuery.exec();
+      const ids = categories.map((category) => category.id);
       const post = await Post.findOrFail(params.post_id);
       await post.related('categories').detach(ids);
       return response.ok(categoryIds || categoryUris);

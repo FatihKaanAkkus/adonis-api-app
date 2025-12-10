@@ -153,7 +153,8 @@ export default class PostsController {
         postQuery.orWhere('id', postId);
       }
       postQuery.orderBy('created_at', 'desc');
-      const ids = (await postQuery.exec()).map((post) => post.id);
+      const posts = await postQuery.exec();
+      const ids = posts.map((post) => post.id);
       const category = await Category.findOrFail(params.category_id);
       await category.related('posts').attach(ids);
       return response.ok(postIds);
@@ -175,7 +176,8 @@ export default class PostsController {
         postQuery.orWhere('id', postId);
       }
       postQuery.orderBy('created_at', 'desc');
-      const ids = (await postQuery.exec()).map((post) => post.id);
+      const posts = await postQuery.exec();
+      const ids = posts.map((post) => post.id);
       const attachment = await Attachment.findOrFail(params.attachment_id);
       await attachment.related('posts').attach(ids);
       return response.ok(postIds);
@@ -217,7 +219,9 @@ export default class PostsController {
    */
   async update({ request, response }: HttpContext) {
     const { params } = await request.validateUsing(postShowValidator);
-    const payload = await request.validateUsing(postUpdateValidator, { meta: params });
+    const payload = await request.validateUsing(postUpdateValidator, {
+      meta: { id: params.id },
+    });
     const post = await Post.findOrFail(params.id);
     post.merge(payload);
     await post.save();
@@ -268,7 +272,8 @@ export default class PostsController {
         postQuery.orWhere('id', postId);
       }
       postQuery.orderBy('created_at', 'desc');
-      const ids = (await postQuery.exec()).map((post) => post.id);
+      const posts = await postQuery.exec();
+      const ids = posts.map((post) => post.id);
       const attachment = await Attachment.findOrFail(params.attachment_id);
       await attachment.related('posts').detach(ids);
       return response.ok(postIds);
