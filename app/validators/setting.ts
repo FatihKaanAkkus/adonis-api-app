@@ -37,6 +37,6 @@ export const settingShowValidator = vine.compile(
 export const settingUpdateValidator = vine.compile(
   vine.object({
     group: settingGroup().startsWith('client-').optional(),
-    value: vine.string().nullable(),
+    value: vine.string().nullable().optional(),
   })
 );

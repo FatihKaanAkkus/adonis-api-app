@@ -118,6 +118,6 @@ router
     router
       .resource('settings', SettingsController)
       .apiOnly()
-      .use(['store', 'update', 'destroy'], middleware.auth({ guards: ['api'] }));
+      .use('*', middleware.auth({ guards: ['api'] }));
   })
   .prefix('v1');
