@@ -75,11 +75,22 @@ export default class UsersController {
    */
   async update({ request, response }: HttpContext) {
     const { params } = await request.validateUsing(userShowValidator);
-    const payload = await request.validateUsing(userUpdateValidator, { meta: params });
+    const { profile, ...payload } = await request.validateUsing(userUpdateValidator, {
+      meta: params,
+    });
     const user = await User.findOrFail(params.id);
     user.merge(payload);
     await user.save();
     await user.load('profile');
+    if (profile) {
+      if (user.profile) {
+        user.profile.merge(profile);
+        await user.profile.save();
+      } else {
+        await user.related('profile').create(profile);
+      }
+      await user.load('profile');
+    }
     return response.ok(user);
   }
 
