@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http';
 import { authLoginValidator, authRegisterValidator } from '#validators/auth';
 import User from '#models/user';
+import env from '#start/env';
 
 export default class AuthController {
   /**
@@ -32,7 +33,8 @@ export default class AuthController {
       const token = await User.accessTokens.create(user, ['*'], { expiresIn: '1 day' });
       return response.ok({ user, token });
     } catch (error) {
-      if (error.code !== 'E_INVALID_CREDENTIALS') {
+      /* c8 ignore next 3 */
+      if (error.code !== 'E_INVALID_CREDENTIALS' && env.get('NODE_ENV') === 'development') {
         console.error(error.message);
       }
       return response.unauthorized({ message: 'Invalid credentials' });

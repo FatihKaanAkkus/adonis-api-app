@@ -21,8 +21,8 @@ export const userStoreValidator = vine.compile(
   vine.object({
     email: vine
       .string()
-      .email()
       .maxLength(254)
+      .email()
       .unique(async (db, value) => {
         return !(await db.from('users').where('email', value).first());
       }),
@@ -50,8 +50,8 @@ export const userUpdateValidator = vine.withMetaData<{ id: number }>().compile(
   vine.object({
     email: vine
       .string()
-      .email()
       .maxLength(254)
+      .email()
       .unique(async (db, value, field) => {
         return !(await db
           .from('users')

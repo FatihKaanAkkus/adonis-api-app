@@ -46,6 +46,8 @@ export const postStoreValidator = vine.compile(
       .requiredIfMissing(['params.category_id', 'params.attachment_id']),
     uri: vine
       .string()
+      .trim()
+      .alphaNumeric({ allowDashes: true, allowUnderscores: true })
       .escape()
       .unique(async (db, value) => {
         return !(await db.from('posts').where('uri', value).first());
@@ -139,6 +141,7 @@ export const postUpdateValidator = vine.withMetaData<{ id: number }>().compile(
     uri: vine
       .string()
       .trim()
+      .alphaNumeric({ allowDashes: true, allowUnderscores: true })
       .escape()
       .unique(async (db, value, field) => {
         return !(await db.from('posts').where('uri', value).whereNot('id', field.meta.id).first());

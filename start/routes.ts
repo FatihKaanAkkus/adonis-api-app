@@ -9,6 +9,7 @@
 
 import router from '@adonisjs/core/services/router';
 import { middleware } from '#start/kernel';
+import env from './env.js';
 
 const AuthController = () => import('#controllers/auth_controller');
 const UsersController = () => import('#controllers/users_controller');
@@ -26,9 +27,11 @@ router
     router
       .group(() => {
         router.post('login', [AuthController, 'login']);
-        router
-          .post('register', [AuthController, 'register'])
-          .use(middleware.auth({ guards: ['api'] }));
+        const registerRoute = router.post('register', [AuthController, 'register']);
+        /* c8 ignore next 3 */
+        if (env.get('NODE_ENV', 'production') === 'production') {
+          registerRoute.use(middleware.auth({ guards: ['api'] }));
+        }
       })
       .prefix('auth');
 

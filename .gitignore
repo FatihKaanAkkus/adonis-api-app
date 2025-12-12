@@ -28,3 +28,7 @@ yarn-error.log
 
 # Drive specific
 /storage/*
+/test_storage/*
+
+# Test specific
+/coverage/*
