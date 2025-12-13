@@ -11,7 +11,7 @@ const dbConfig = defineConfig({
         filename:
           env.get('NODE_ENV') === 'test'
             ? app.tmpPath('test_db.sqlite3')
-            : app.tmpPath('db.sqlite3'),
+            : env.get('DB_PATH', app.tmpPath('db.sqlite3')),
       },
       useNullAsDefault: true,
       migrations: {
