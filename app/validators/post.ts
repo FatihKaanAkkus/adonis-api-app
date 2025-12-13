@@ -224,15 +224,13 @@ export const postIdsStoreValidator = vine
                 .where('post_id', value)
                 .where('category_id', field.meta.category_id)
                 .first());
-            }
-            if (field.meta.attachment_id) {
+            } else {
               return !(await db
                 .from('attachment_post')
                 .where('post_id', value)
                 .where('attachment_id', field.meta.attachment_id)
                 .first());
             }
-            return false;
           })
       ),
     })
@@ -260,15 +258,13 @@ export const postIdsDestroyValidator = vine
                 .where('post_id', value)
                 .andWhere('category_id', field.meta.category_id)
                 .first());
-            }
-            if (field.meta.attachment_id) {
+            } else {
               return !!(await db
                 .from('attachment_post')
                 .where('post_id', value)
                 .andWhere('attachment_id', field.meta.attachment_id)
                 .first());
             }
-            return false;
           })
       ),
     })

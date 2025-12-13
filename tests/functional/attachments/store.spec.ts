@@ -228,4 +228,28 @@ test.group('Attachments store', (group) => {
       ],
     });
   });
+
+  test('should fail to create attachment when file already exists', async ({ client }) => {
+    const user = await UserFactory.create();
+    const token = await User.accessTokens.create(user);
+
+    // First upload
+    await client
+      .post('/v1/attachments')
+      .bearerToken(token.value!.release())
+      .fields({ rename: 'duplicate-test' })
+      .file('file', join(import.meta.dirname, '../../fixtures/test-image.png'));
+
+    // Try to upload with same rename
+    const response = await client
+      .post('/v1/attachments')
+      .bearerToken(token.value!.release())
+      .fields({ rename: 'duplicate-test' })
+      .file('file', join(import.meta.dirname, '../../fixtures/test-image.png'));
+
+    response.assertStatus(400);
+    response.assertBodyContains({
+      message: 'File already exists',
+    });
+  });
 });

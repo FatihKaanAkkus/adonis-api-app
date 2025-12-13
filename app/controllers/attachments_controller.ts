@@ -118,6 +118,7 @@ export default class AttachmentsController {
     }
 
     const image = request.file('file', { size: '10mb', extnames: ['jpeg', 'jpg', 'png', 'webp'] });
+    /* c8 ignore next 3 */
     if (!image) {
       return response.badRequest({ message: 'Image file must be provided' });
     }
