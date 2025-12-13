@@ -69,19 +69,31 @@ To get started, follow the instructions below to set up the project on your loca
 
 8. Access the API at `http://localhost:3333` or the configured `PORT` in your `.env` file.
 
-9. Run tests:
+9. Run linting:
 
    ```bash
-   npm test
+   npm run lint
    ```
 
-10. For a production build, run:
+10. Run tests:
+
+    ```bash
+    npm test
+    ```
+
+11. Run tests with coverage report:
+
+    ```bash
+    npm run test:coverage
+    ```
+
+12. For a production build, run:
 
     ```bash
     npm run build
     ```
 
-11. Start the production server:
+13. Start the production server:
 
     ```bash
     npm start

@@ -27,8 +27,8 @@ yarn-error.log
 .DS_Store
 
 # Drive specific
-/storage/*
-/test_storage/*
+/storage
+/test_storage
 
 # Test specific
-/coverage/*
+coverage
