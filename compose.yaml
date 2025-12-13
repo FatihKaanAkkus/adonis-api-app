@@ -6,3 +6,8 @@ services:
       NODE_ENV: production
     ports:
       - 3333:3333
+    volumes:
+      - storage_data:/storage
+
+volumes:
+  storage_data:

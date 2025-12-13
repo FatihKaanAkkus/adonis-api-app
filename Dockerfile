@@ -31,8 +31,7 @@ ADD .env.docker.local /app/.env
 
 # Custom post-install steps
 RUN mkdir /app/tmp
-RUN npm run db-migrate -- --force
-RUN npm run db-seed
+ADD docker_start.sh ./start.sh
 
 EXPOSE 3333
-CMD ["node", "./bin/server.js"]
+CMD ["sh", "./start.sh"]
