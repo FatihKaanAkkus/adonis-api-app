@@ -135,6 +135,20 @@ export const postShowIdValidator = vine.compile(
   })
 );
 
+export const postUpdateParamsValidator = vine.compile(
+  vine.object({
+    params: vine.object({
+      id: vine
+        .number()
+        .positive()
+        .withoutDecimals()
+        .exists(async (db, value) => {
+          return !!(await db.from('posts').where('id', value).first());
+        }),
+    }),
+  })
+);
+
 export const postUpdateValidator = vine.withMetaData<{ id: number }>().compile(
   vine.object({
     type: vine.enum(['post', 'page']).optional(),

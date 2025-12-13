@@ -415,4 +415,36 @@ test.group('Posts store', (group) => {
       ],
     });
   });
+
+  test('should fail to attach posts to category without postIds', async ({ client }) => {
+    const user = await UserFactory.create();
+    const token = await User.accessTokens.create(user);
+    const category = await CategoryFactory.create();
+
+    const response = await client
+      .post(`/v1/categories/${category.id}/posts`)
+      .bearerToken(token.value!.release())
+      .json({});
+
+    response.assertStatus(422);
+    response.assertBodyContains({
+      errors: [{ field: 'postIds', rule: 'required' }],
+    });
+  });
+
+  test('should fail to attach posts to attachment without postIds', async ({ client }) => {
+    const user = await UserFactory.create();
+    const token = await User.accessTokens.create(user);
+    const attachment = await AttachmentFactory.create();
+
+    const response = await client
+      .post(`/v1/attachments/${attachment.id}/posts`)
+      .bearerToken(token.value!.release())
+      .json({});
+
+    response.assertStatus(422);
+    response.assertBodyContains({
+      errors: [{ field: 'postIds', rule: 'required' }],
+    });
+  });
 });

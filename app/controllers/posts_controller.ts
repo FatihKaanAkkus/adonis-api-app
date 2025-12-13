@@ -9,6 +9,7 @@ import {
   postShowIdValidator,
   postShowValidator,
   postStoreValidator,
+  postUpdateParamsValidator,
   postUpdateValidator,
 } from '#validators/post';
 import type { HttpContext } from '@adonisjs/core/http';
@@ -74,11 +75,7 @@ export default class PostsController {
 
     const query = Post.query();
     if (type) {
-      if (type.startsWith('%')) {
-        query.whereLike('type', type);
-      } else {
-        query.where('type', type);
-      }
+      query.where('type', type);
     }
     if (uri) {
       if (uri.startsWith('%')) {
@@ -142,12 +139,6 @@ export default class PostsController {
         meta: { category_id: params.category_id },
       });
 
-      if (!postIds) {
-        return response.badRequest({
-          message: 'Field postIds must be provided when attaching posts to a category',
-        });
-      }
-
       const postQuery = Post.query();
       for (const postId of postIds) {
         postQuery.orWhere('id', postId);
@@ -164,12 +155,6 @@ export default class PostsController {
       const { postIds } = await request.validateUsing(postIdsStoreValidator, {
         meta: { attachment_id: params.attachment_id },
       });
-
-      if (!postIds) {
-        return response.badRequest({
-          message: 'Field postIds must be provided when attaching posts to an attachment',
-        });
-      }
 
       const postQuery = Post.query();
       for (const postId of postIds) {
@@ -218,7 +203,7 @@ export default class PostsController {
    * Handle form submission for the edit action
    */
   async update({ request, response }: HttpContext) {
-    const { params } = await request.validateUsing(postShowValidator);
+    const { params } = await request.validateUsing(postUpdateParamsValidator);
     const payload = await request.validateUsing(postUpdateValidator, {
       meta: { id: params.id },
     });
@@ -239,12 +224,6 @@ export default class PostsController {
         meta: { category_id: params.category_id },
       });
 
-      if (!postIds) {
-        return response.badRequest({
-          message: 'Field postIds must be provided when detaching posts from a category',
-        });
-      }
-
       const postQuery = Post.query();
       for (const postId of postIds) {
         postQuery.orWhere('id', postId);
@@ -260,12 +239,6 @@ export default class PostsController {
       const { postIds } = await request.validateUsing(postIdsDestroyValidator, {
         meta: { attachment_id: params.attachment_id },
       });
-
-      if (!postIds) {
-        return response.badRequest({
-          message: 'Field postIds must be provided when detaching posts from an attachment',
-        });
-      }
 
       const postQuery = Post.query();
       for (const postId of postIds) {
