@@ -69,4 +69,20 @@ export default defineConfig({
     ],
     forceExit: false,
   },
+
+  /*
+  |--------------------------------------------------------------------------
+  | Meta files
+  |--------------------------------------------------------------------------
+  |
+  | List of additional files to copy to the build directory during the build
+  | process.
+  |
+  */
+  metaFiles: [
+    {
+      pattern: 'ecosystem.config.cjs',
+      reloadServer: false,
+    },
+  ],
 });
