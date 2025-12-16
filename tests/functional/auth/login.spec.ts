@@ -54,6 +54,30 @@ test.group('Auth login', (group) => {
     assert.properties(response.body().user.profile, ['id', 'userId', 'createdAt']);
   });
 
+  test('should login via web session when X-Client-Type is web', async ({ client, assert }) => {
+    await UserFactory.merge({ email: 'web@example.com', password: 'password123' }).create();
+
+    const response = await client.post('/v1/auth/login').header('X-Client-Type', 'web').json({
+      email: 'web@example.com',
+      password: 'password123',
+    });
+
+    response.assertStatus(200);
+    response.assertBodyContains({
+      user: {
+        email: 'web@example.com',
+      },
+    });
+
+    assert.property(response.body(), 'user');
+    assert.notProperty(response.body(), 'token');
+    assert.properties(response.body().user, ['id', 'email', 'profile', 'createdAt']);
+
+    // Check if session cookies are set
+    response.assertCookie('adonis-session');
+    assert.isTrue(Object.values(response.cookies()).length >= 2);
+  });
+
   test('should delete old tokens and create only one token per user', async ({
     client,
     assert,
@@ -174,5 +198,21 @@ test.group('Auth login', (group) => {
 
     response.assertStatus(401);
     response.assertBodyContains({ message: 'Invalid credentials' });
+  });
+
+  test('should fail to login via web with invalid password', async ({ client, assert }) => {
+    await UserFactory.merge({
+      email: 'webfail@example.com',
+      password: 'correctpassword',
+    }).create();
+
+    const response = await client.post('/v1/auth/login').header('X-Client-Type', 'web').json({
+      email: 'webfail@example.com',
+      password: 'wrongpassword',
+    });
+
+    response.assertStatus(401);
+    response.assertBody({ message: 'Invalid credentials' });
+    assert.notProperty(response.body(), 'user');
   });
 });

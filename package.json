@@ -1,6 +1,6 @@
 {
   "name": "adonis-api-app",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "license": "UNLICENSED",
@@ -65,6 +65,7 @@
     "@adonisjs/cors": "^2.2.1",
     "@adonisjs/drive": "^3.4.1",
     "@adonisjs/lucid": "^21.8.1",
+    "@adonisjs/session": "^7.6.0",
     "@vinejs/vine": "^4.2.0",
     "better-sqlite3": "^12.5.0",
     "luxon": "^3.7.2",

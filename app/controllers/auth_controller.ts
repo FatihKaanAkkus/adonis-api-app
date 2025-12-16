@@ -18,10 +18,18 @@ export default class AuthController {
   /**
    * Validate user credentials and return a new access token
    */
-  async login({ request, response }: HttpContext) {
+  async login({ request, response, auth }: HttpContext) {
     try {
       const payload = await request.validateUsing(authLoginValidator);
       const user = await User.verifyCredentials(payload.email, payload.password);
+
+      const clientType = request.header('X-Client-Type');
+      if (clientType === 'web') {
+        await auth.use('web').login(user);
+        await user.load('profile');
+        return response.ok({ user });
+      }
+
       await user.load('profile');
 
       // Allow only one token per user
