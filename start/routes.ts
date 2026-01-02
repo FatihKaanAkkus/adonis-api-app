@@ -26,24 +26,30 @@ router
 
     router
       .group(() => {
-        router.post('login', [AuthController, 'login']);
         const registerRoute = router.post('register', [AuthController, 'register']);
         /* c8 ignore next 3 */
         if (env.get('NODE_ENV', 'production') === 'production') {
           registerRoute.use(middleware.auth({ guards: ['api'] }));
         }
+        router.post('login', [AuthController, 'login']);
+        router
+          .get('session', [AuthController, 'session'])
+          .use(middleware.auth({ guards: ['api', 'web'] }));
+        router
+          .post('revoke', [AuthController, 'revoke'])
+          .use(middleware.auth({ guards: ['api', 'web'] }));
       })
       .prefix('auth');
 
     router
       .resource('users', UsersController)
       .apiOnly()
-      .use('*', middleware.auth({ guards: ['api'] }));
+      .use('*', middleware.auth({ guards: ['api', 'web'] }));
 
     router
       .resource('posts', PostsController)
       .apiOnly()
-      .use(['store', 'update', 'destroy'], middleware.auth({ guards: ['api'] }));
+      .use(['store', 'update', 'destroy'], middleware.auth({ guards: ['api', 'web'] }));
 
     router
       .group(() => {
@@ -51,11 +57,11 @@ router
         router
           .post('/', [CategoriesController, 'store'])
           .as('store')
-          .use(middleware.auth({ guards: ['api'] }));
+          .use(middleware.auth({ guards: ['api', 'web'] }));
         router
           .delete('/', [CategoriesController, 'destroy'])
           .as('destroy')
-          .use(middleware.auth({ guards: ['api'] }));
+          .use(middleware.auth({ guards: ['api', 'web'] }));
       })
       .prefix('posts/:post_id/categories')
       .as('posts.categories');
@@ -66,11 +72,11 @@ router
         router
           .post('/', [AttachmentsController, 'store'])
           .as('store')
-          .use(middleware.auth({ guards: ['api'] }));
+          .use(middleware.auth({ guards: ['api', 'web'] }));
         router
           .delete('/', [AttachmentsController, 'destroy'])
           .as('destroy')
-          .use(middleware.auth({ guards: ['api'] }));
+          .use(middleware.auth({ guards: ['api', 'web'] }));
       })
       .prefix('posts/:post_id/attachments')
       .as('posts.attachments');
@@ -78,7 +84,7 @@ router
     router
       .resource('categories', CategoriesController)
       .apiOnly()
-      .use(['store', 'update', 'destroy'], middleware.auth({ guards: ['api'] }));
+      .use(['store', 'update', 'destroy'], middleware.auth({ guards: ['api', 'web'] }));
 
     router
       .group(() => {
@@ -86,11 +92,11 @@ router
         router
           .post('/', [PostsController, 'store'])
           .as('store')
-          .use(middleware.auth({ guards: ['api'] }));
+          .use(middleware.auth({ guards: ['api', 'web'] }));
         router
           .delete('/', [PostsController, 'destroy'])
           .as('destroy')
-          .use(middleware.auth({ guards: ['api'] }));
+          .use(middleware.auth({ guards: ['api', 'web'] }));
       })
       .prefix('categories/:category_id/posts')
       .as('categories.posts');
@@ -98,7 +104,7 @@ router
     router
       .resource('attachments', AttachmentsController)
       .apiOnly()
-      .use(['store', 'update', 'destroy'], middleware.auth({ guards: ['api'] }));
+      .use(['store', 'update', 'destroy'], middleware.auth({ guards: ['api', 'web'] }));
 
     router
       .group(() => {
@@ -106,11 +112,11 @@ router
         router
           .post('/', [PostsController, 'store'])
           .as('store')
-          .use(middleware.auth({ guards: ['api'] }));
+          .use(middleware.auth({ guards: ['api', 'web'] }));
         router
           .delete('/', [PostsController, 'destroy'])
           .as('destroy')
-          .use(middleware.auth({ guards: ['api'] }));
+          .use(middleware.auth({ guards: ['api', 'web'] }));
       })
       .prefix('attachments/:attachment_id/posts')
       .as('attachments.posts');
@@ -118,6 +124,6 @@ router
     router
       .resource('settings', SettingsController)
       .apiOnly()
-      .use('*', middleware.auth({ guards: ['api'] }));
+      .use('*', middleware.auth({ guards: ['api', 'web'] }));
   })
   .prefix('v1');

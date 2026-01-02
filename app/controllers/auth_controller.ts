@@ -18,10 +18,18 @@ export default class AuthController {
   /**
    * Validate user credentials and return a new access token
    */
-  async login({ request, response }: HttpContext) {
+  async login({ request, response, auth }: HttpContext) {
     try {
       const payload = await request.validateUsing(authLoginValidator);
       const user = await User.verifyCredentials(payload.email, payload.password);
+
+      const clientType = request.header('X-Client-Type');
+      if (clientType === 'web') {
+        await auth.use('web').login(user);
+        await user.load('profile');
+        return response.ok({ user });
+      }
+
       await user.load('profile');
 
       // Allow only one token per user
@@ -38,6 +46,36 @@ export default class AuthController {
         console.error(error.message);
       }
       return response.unauthorized({ message: 'Invalid credentials' });
+    }
+  }
+
+  /**
+   * Retrieve the current authenticated user session
+   */
+  async session({ auth, response }: HttpContext) {
+    /* c8 ignore next 3 */
+    if (!auth.user) {
+      return response.unauthorized({ message: 'Unauthorized' });
+    }
+
+    const user = auth.user as User;
+    await user.load('profile');
+    return response.ok({ user });
+  }
+
+  /**
+   * Revoke the current api access token or revoke web session
+   */
+  async revoke({ auth, response }: HttpContext) {
+    if (auth.use('web').isAuthenticated) {
+      await auth.use('web').logout();
+      return response.ok({ message: 'Session revoked successfully' });
+    }
+
+    const token = auth.use('api').user?.currentAccessToken;
+    if (token) {
+      await User.accessTokens.delete(auth.user as User, token.identifier);
+      return response.ok({ message: 'Access token revoked successfully' });
     }
   }
 }
