@@ -48,4 +48,34 @@ export default class AuthController {
       return response.unauthorized({ message: 'Invalid credentials' });
     }
   }
+
+  /**
+   * Retrieve the current authenticated user session
+   */
+  async session({ auth, response }: HttpContext) {
+    /* c8 ignore next 3 */
+    if (!auth.user) {
+      return response.unauthorized({ message: 'Unauthorized' });
+    }
+
+    const user = auth.user as User;
+    await user.load('profile');
+    return response.ok({ user });
+  }
+
+  /**
+   * Revoke the current api access token or revoke web session
+   */
+  async revoke({ auth, response }: HttpContext) {
+    if (auth.use('web').isAuthenticated) {
+      await auth.use('web').logout();
+      return response.ok({ message: 'Session revoked successfully' });
+    }
+
+    const token = auth.use('api').user?.currentAccessToken;
+    if (token) {
+      await User.accessTokens.delete(auth.user as User, token.identifier);
+      return response.ok({ message: 'Access token revoked successfully' });
+    }
+  }
 }

@@ -26,12 +26,18 @@ router
 
     router
       .group(() => {
-        router.post('login', [AuthController, 'login']);
         const registerRoute = router.post('register', [AuthController, 'register']);
         /* c8 ignore next 3 */
         if (env.get('NODE_ENV', 'production') === 'production') {
           registerRoute.use(middleware.auth({ guards: ['api'] }));
         }
+        router.post('login', [AuthController, 'login']);
+        router
+          .get('session', [AuthController, 'session'])
+          .use(middleware.auth({ guards: ['api', 'web'] }));
+        router
+          .post('revoke', [AuthController, 'revoke'])
+          .use(middleware.auth({ guards: ['api', 'web'] }));
       })
       .prefix('auth');
 
